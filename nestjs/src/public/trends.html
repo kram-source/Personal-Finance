@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Spending trends</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: system-ui, sans-serif;
+        background: #f4f7fb;
+        color: #172033;
+      }
+      body { margin: 0; padding: 2rem 1rem; }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        border: 1px solid #d7dfeb;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 8px 24px #17203312;
+      }
+      h1 { margin-top: 0; }
+      p { color: #526078; }
+      form { display: flex; flex-wrap: wrap; align-items: end; gap: 1rem; }
+      label { display: grid; gap: 0.4rem; font-weight: 600; }
+      input {
+        box-sizing: border-box;
+        min-height: 2.6rem;
+        padding: 0.5rem 0.7rem;
+        border: 1px solid #aab7ca;
+        border-radius: 6px;
+        font: inherit;
+      }
+      #token { width: min(34rem, 80vw); }
+      #months { width: 7rem; }
+      button {
+        min-height: 2.6rem;
+        padding: 0.5rem 1rem;
+        border: 0;
+        border-radius: 6px;
+        background: #2457c5;
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:disabled { opacity: 0.6; cursor: wait; }
+      #status { min-height: 1.5rem; margin: 1rem 0; }
+      #status.error { color: #b42318; }
+      #status.success { color: #137547; }
+      #chart-wrap { overflow-x: auto; }
+      #chart { display: block; width: 100%; min-width: 650px; height: auto; }
+      .grid-line { stroke: #e4e9f1; stroke-width: 1; }
+      .axis-label { fill: #526078; font-size: 12px; }
+      .series-line { fill: none; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+      .series-point { stroke: #fff; stroke-width: 2; }
+      .legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 1rem; }
+      .legend-item { display: inline-flex; align-items: center; gap: 0.45rem; }
+      .swatch { width: 0.8rem; height: 0.8rem; border-radius: 50%; }
+      .note { font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Income and spending trends</h1>
+      <p>Enter a NestJS access token to load your private monthly report and draw its income, expenses, and net totals.</p>
+      <form id="controls">
+        <label>
+          NestJS access token
+          <input id="token" type="password" autocomplete="off" required>
+        </label>
+        <label>
+          Months
+          <input id="months" type="number" min="1" max="36" value="6" required>
+        </label>
+        <button id="submit" type="submit">Load chart</button>
+      </form>
+      <p class="note">The token is used only for this page session and is not saved in browser storage.</p>
+      <p id="status" role="status" aria-live="polite"></p>
+      <div id="chart-wrap" hidden>
+        <svg id="chart" viewBox="0 0 960 500" role="img" aria-label="Monthly income, expenses, and net trend chart"></svg>
+        <div id="legend" class="legend"></div>
+      </div>
+    </main>
+    <script>
+      const form = document.querySelector('#controls');
+      const tokenInput = document.querySelector('#token');
+      const monthsInput = document.querySelector('#months');
+      const submitButton = document.querySelector('#submit');
+      const status = document.querySelector('#status');
+      const chart = document.querySelector('#chart');
+      const chartWrap = document.querySelector('#chart-wrap');
+      const legend = document.querySelector('#legend');
+      const colors = { income: '#16834a', expenses: '#d04444', net: '#315fce' };
+      const seriesNames = { income: 'Income', expenses: 'Expenses', net: 'Net' };
+      const svgNs = 'http://www.w3.org/2000/svg';
+      const money = new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: 'USD',
+        maximumFractionDigits: 0
+      });
+
+      function svgElement(name, attributes, text) {
+        const element = document.createElementNS(svgNs, name);
+        for (const [key, value] of Object.entries(attributes || {})) {
+          element.setAttribute(key, value);
+        }
+        if (text !== undefined) element.textContent = text;
+        return element;
+      }
+
+      function renderChart(data) {
+        const width = 960;
+        const height = 500;
+        const margin = { top: 30, right: 30, bottom: 70, left: 100 };
+        const plotWidth = width - margin.left - margin.right;
+        const plotHeight = height - margin.top - margin.bottom;
+        const values = data.series.flatMap(item => [item.income, item.expenses, item.net]);
+        const rawMin = Math.min(0, ...values);
+        const rawMax = Math.max(0, ...values);
+        const range = rawMax - rawMin || 1;
+        const min = rawMin - range * 0.08;
+        const max = rawMax + range * 0.08;
+        const x = index => margin.left + (data.series.length === 1
+          ? plotWidth / 2
+          : (index * plotWidth) / (data.series.length - 1));
+        const y = value => margin.top + ((max - value) / (max - min)) * plotHeight;
+
+        chart.replaceChildren();
+        legend.replaceChildren();
+        chart.setAttribute('viewBox', `0 0 ${width} ${height}`);
+
+        for (let step = 0; step <= 4; step++) {
+          const value = max - ((max - min) * step) / 4;
+          const yPos = y(value);
+          chart.append(
+            svgElement('line', {
+              x1: margin.left, y1: yPos, x2: width - margin.right, y2: yPos,
+              class: 'grid-line'
+            }),
+            svgElement('text', {
+              x: margin.left - 12, y: yPos + 4, 'text-anchor': 'end', class: 'axis-label'
+            }, money.format(value))
+          );
+        }
+
+        data.series.forEach((item, index) => {
+          const label = new Date(Date.UTC(item.year, item.month - 1, 1))
+            .toLocaleDateString(undefined, { month: 'short', year: '2-digit', timeZone: 'UTC' });
+          chart.append(svgElement('text', {
+            x: x(index), y: height - margin.bottom + 25,
+            'text-anchor': 'middle', class: 'axis-label'
+          }, label));
+        });
+
+        for (const key of Object.keys(seriesNames)) {
+          const points = data.series.map((item, index) => ({
+            x: x(index),
+            y: y(item[key]),
+            value: item[key]
+          }));
+          chart.append(svgElement('polyline', {
+            points: points.map(point => `${point.x},${point.y}`).join(' '),
+            class: 'series-line',
+            stroke: colors[key]
+          }));
+          for (const point of points) {
+            const circle = svgElement('circle', {
+              cx: point.x, cy: point.y, r: 5,
+              class: 'series-point', fill: colors[key]
+            });
+            circle.append(svgElement('title', {}, `${seriesNames[key]}: ${money.format(point.value)}`));
+            chart.append(circle);
+          }
+          const item = document.createElement('span');
+          item.className = 'legend-item';
+          const swatch = document.createElement('span');
+          swatch.className = 'swatch';
+          swatch.style.backgroundColor = colors[key];
+          const label = document.createElement('span');
+          label.textContent = seriesNames[key];
+          item.append(swatch, label);
+          legend.append(item);
+        }
+
+        chartWrap.hidden = false;
+      }
+
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        chartWrap.hidden = true;
+        status.className = '';
+        status.textContent = '';
+        submitButton.disabled = true;
+        try {
+          const months = Number(monthsInput.value);
+          const response = await fetch(`/reports/trends?months=${encodeURIComponent(months)}`, {
+            headers: { Authorization: `Bearer ${tokenInput.value.trim()}` }
+          });
+          if (!response.ok) {
+            const body = await response.json().catch(() => ({}));
+            throw new Error(body.message || body.detail || `Request failed with HTTP ${response.status}`);
+          }
+          const data = await response.json();
+          renderChart(data);
+          status.className = 'success';
+          status.textContent = `Showing ${data.series.length} months of trend data.`;
+        } catch (error) {
+          status.className = 'error';
+          status.textContent = error instanceof Error ? error.message : 'Unable to load trends.';
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>

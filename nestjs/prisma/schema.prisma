@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now()) @db.Timestamp(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamp(3)
+  categories   Category[]
+  transactions Transaction[]
+  budgets      Budget[]
+}
+
+model Category {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String
+  type         TransactionType
+  userId       String?       @db.Uuid
+  createdAt    DateTime      @default(now()) @db.Timestamp(3)
+  updatedAt    DateTime      @updatedAt @db.Timestamp(3)
+  user         User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@index([userId, type])
+}
+
+model Transaction {
+  id          String          @id @default(uuid()) @db.Uuid
+  userId      String          @db.Uuid
+  amount      Decimal         @db.Decimal(12, 2)
+  type        TransactionType
+  description String
+  date        DateTime        @db.Timestamp(3)
+  categoryId  String          @db.Uuid
+  source      String?
+  createdAt   DateTime        @default(now()) @db.Timestamp(3)
+  updatedAt   DateTime        @updatedAt @db.Timestamp(3)
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category    Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@index([userId, date])
+  @@index([userId, type, date])
+  @@index([categoryId])
+}
+
+model Budget {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @db.Uuid
+  categoryId String   @db.Uuid
+  year       Int
+  month      Int
+  amount     Decimal  @db.Decimal(12, 2)
+  createdAt  DateTime @default(now()) @db.Timestamp(3)
+  updatedAt  DateTime @updatedAt @db.Timestamp(3)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, year, month])
+  @@index([userId, year, month])
+}

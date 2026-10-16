@@ -1,0 +1,51 @@
+date,description,amount,type,category
+2026-01-02,Monthly salary,4200.00,INCOME,Salary
+2026-01-03,Grocery store,86.42,EXPENSE,Food
+2026-01-05,Bus pass,32.00,EXPENSE,Transport
+2026-01-07,Electric bill,74.18,EXPENSE,Bills
+2026-01-09,Freelance logo design,350.00,INCOME,Freelance
+2026-01-10,Pharmacy purchase,18.75,EXPENSE,Healthcare
+2026-01-12,Movie tickets,28.00,EXPENSE,Entertainment
+2026-01-14,Household supplies,46.90,EXPENSE,Shopping
+2026-01-16,Cafe lunch,14.25,EXPENSE,Food
+2026-01-18,Internet bill,55.00,EXPENSE,Bills
+2026-01-20,Train fare,21.50,EXPENSE,Transport
+2026-01-22,Online book purchase,19.99,EXPENSE,Shopping
+2026-01-24,Other bank charge,6.00,EXPENSE,Other
+2026-01-27,Grocery store,63.37,EXPENSE,Food
+2026-02-02,Monthly salary,4200.00,INCOME,Salary
+2026-02-03,Supermarket groceries,92.16,EXPENSE,Food
+2026-02-05,Water bill,31.44,EXPENSE,Bills
+2026-02-07,Taxi ride,18.60,EXPENSE,Transport
+2026-02-09,Freelance website work,480.00,INCOME,Freelance
+2026-02-10,Doctor visit,45.00,EXPENSE,Healthcare
+2026-02-12,Streaming subscription,12.99,EXPENSE,Entertainment
+2026-02-14,Shoes purchase,68.50,EXPENSE,Shopping
+2026-02-16,Cafe breakfast,11.80,EXPENSE,Food
+2026-02-18,Gas bill,49.72,EXPENSE,Bills
+2026-02-20,Metro card refill,25.00,EXPENSE,Transport
+2026-02-22,Kitchen supplies,37.45,EXPENSE,Shopping
+2026-02-24,Other service charge,4.50,EXPENSE,Other
+2026-02-27,Market vegetables,29.30,EXPENSE,Food
+2026-03-02,Monthly salary,4200.00,INCOME,Salary
+2026-03-03,Weekly groceries,78.64,EXPENSE,Food
+2026-03-05,Mobile phone bill,42.00,EXPENSE,Bills
+2026-03-07,Parking and tolls,16.25,EXPENSE,Transport
+2026-03-09,Freelance consulting,525.00,INCOME,Freelance
+2026-03-10,Dental checkup,80.00,EXPENSE,Healthcare
+2026-03-12,Concert ticket,65.00,EXPENSE,Entertainment
+2026-03-14,Clothing purchase,54.99,EXPENSE,Shopping
+2026-03-16,Restaurant dinner,38.40,EXPENSE,Food
+2026-03-18,Electric bill,69.83,EXPENSE,Bills
+2026-03-20,Bus and train fares,27.50,EXPENSE,Transport
+2026-03-22,Home storage items,24.75,EXPENSE,Shopping
+2026-03-24,Other account fee,3.00,EXPENSE,Other
+2026-03-27,Groceries,71.08,EXPENSE,Food
+2026-04-02,Monthly salary,4200.00,INCOME,Salary
+2026-04-03,Supermarket groceries,104.52,EXPENSE,Food
+2026-04-05,Rent utility bill,120.00,EXPENSE,Bills
+2026-04-07,Rideshare trip,22.40,EXPENSE,Transport
+2026-04-09,Freelance writing project,400.00,INCOME,Freelance
+2026-04-10,Prescription medicine,26.35,EXPENSE,Healthcare
+2026-04-12,Cinema and snacks,31.50,EXPENSE,Entertainment
+2026-04-14,Home goods purchase,43.20,EXPENSE,Shopping
